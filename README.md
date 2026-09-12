@@ -108,6 +108,21 @@ Para encerrar:
 sair
 ```
 
+## Resultados Parciais
+
+Nesta sprint, foi desenvolvido um protótipo funcional do ChupIA utilizando dados simulados de pets e registros de diário.
+
+Os testes realizados demonstraram que o assistente consegue:
+
+- Consultar e resumir os registros do pet;
+- Comparar informações entre diferentes datas;
+- Identificar mudanças presentes no histórico;
+- Manter o contexto entre mensagens da mesma conversa;
+- Reconhecer quando uma informação não está disponível;
+- Respeitar o guardrail veterinário, sem realizar diagnósticos ou recomendar tratamentos.
+
+O protótipo foi testado tanto no Google Colab quanto como aplicação Python executada pelo terminal.
+
 ## Próximos Passos
 
 Na Sprint 4, o ChupIA irá consumir diretamente a API Java do ChupinVet, substituindo os dados simulados pelas informações armazenadas no banco Oracle.

@@ -51,6 +51,8 @@ Usuário → ChupIA → Gemini → Ferramenta de consulta → Dados simulados �
 
 ```text
 ChupIA/
+├── docs/
+|   └── ChupIA_Documentacao.pdf   
 ├── .env.example
 ├── .gitignore
 ├── chupia.py

@@ -1,26 +1,22 @@
 import os
+import token
 from dotenv import load_dotenv
-from clients.java_api import consultar_pet, consultar_diarios
+from clients.java_api import fazer_login, consultar_pet, consultar_diarios
 load_dotenv()
 
 
 def consultar_dados_pet(id_pet: int) -> dict:
-    token = os.getenv("JAVA_API_TOKEN")
-
-    if not token:
-        return {
-            "erro": "Token de acesso à API Java não configurado."
-        }
-
     try:
+        token = fazer_login()
+
         pet = consultar_pet(id_pet, token)
         resposta_diarios = consultar_diarios(id_pet, token)
 
-    except Exception as erro:
+    except Exception:
         return {
-            "erro": f"Não foi possível consultar a API Java: {erro}"
+            "erro": "Não foi possível autenticar ou consultar os dados na API Java."
         }
-
+    
     contexto_pet = {
         "nomePet": pet.get("nomePet"),
         "especie": pet.get("especie"),

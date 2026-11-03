@@ -1,4 +1,4 @@
-from chupia import SessaoChupIA
+from services.gemini_service import SessaoChupIA
 
 sessao = SessaoChupIA(id_pet=1)
 

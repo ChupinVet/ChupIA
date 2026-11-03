@@ -1,35 +1,44 @@
-from services.dados_simulados import PETS, DIARIOS
+import os
+from dotenv import load_dotenv
+from clients.java_api import consultar_pet, consultar_diarios
+load_dotenv()
 
 
 def consultar_dados_pet(id_pet: int) -> dict:
-    pet = PETS.get(id_pet)
-    diarios = DIARIOS.get(id_pet, [])
+    token = os.getenv("JAVA_API_TOKEN")
 
-    if pet is None:
+    if not token:
         return {
-            "erro": f"Pet com id {id_pet} não encontrado."
+            "erro": "Token de acesso à API Java não configurado."
+        }
+
+    try:
+        pet = consultar_pet(id_pet, token)
+        resposta_diarios = consultar_diarios(id_pet, token)
+
+    except Exception as erro:
+        return {
+            "erro": f"Não foi possível consultar a API Java: {erro}"
         }
 
     contexto_pet = {
-        "nomePet": pet["nomePet"],
-        "especie": pet["especie"],
-        "raca": pet["raca"],
-        "idade": pet["idade"],
-        "peso": pet["peso"]
+        "nomePet": pet.get("nomePet"),
+        "especie": pet.get("especie"),
+        "raca": pet.get("raca"),
+        "idade": pet.get("idade"),
+        "peso": pet.get("peso")
     }
 
     contexto_diarios = []
 
-    for diario in diarios:
+    for diario in resposta_diarios.get("content", []):
         contexto_diarios.append({
-            "dataRegistro": diario["dataRegistro"],
-            "humor": diario["humor"],
-            "alimentacao": diario["alimentacao"],
-            "consumoAgua": diario["consumoAgua"],
-            "comportamento": diario["comportamento"],
-            "sintomas": diario["sintomas"],
-            "observacoes": diario["observacoes"],
-            "pesoRegistrado": diario["pesoRegistrado"]
+            "dataRegistro": diario.get("dataRegistro"),
+            "humor": diario.get("humor"),
+            "alimentacao": diario.get("alimentacao"),
+            "consumoAgua": diario.get("consumoAgua"),
+            "comportamento": diario.get("comportamento"),
+            "pesoRegistrado": diario.get("pesoRegistrado")
         })
 
     return {

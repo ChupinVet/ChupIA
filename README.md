@@ -1,5 +1,16 @@
 # ChupIA — Assistente Inteligente do ChupinVet
 
+# Integrantes
+
+| Nome Completo | RM | Turma |
+|---|---|---|
+| Agatha Yie Won Yun | RM561507 | 2TDSA |
+| Ana Claudia Fernandes Martins | RM561190 | 2TDSR |
+| Samantha Faruolo Galdi | RM554794 | 2TDSA |
+| Vitor Fria Dalmagro | RM566052 | 2TDSA |
+
+## Sobre
+
 O **ChupIA** é o assistente de Inteligência Artificial do projeto **ChupinVet**.
 
 Seu objetivo é auxiliar os responsáveis no acompanhamento das informações registradas sobre seus pets, permitindo realizar perguntas em linguagem natural sobre os dados disponíveis no sistema.

@@ -97,6 +97,8 @@ ChupIA/
     ├── config.py
     ├── clients/
     │   └── java_api.py
+    ├── docs/
+    │   └── ChupIA_Documentacao_Sprint4_Atualizada.pdf
     ├── services/
     │   ├── gemini_service.py
     │   └── pet_service.py

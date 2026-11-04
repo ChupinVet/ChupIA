@@ -122,13 +122,40 @@ ChupIA/
 
 ## Configuração
 
-### 1. Instalar as dependências
+### 1. Criar o ambiente virtual e instalar as dependências
 
 É necessário ter o Python instalado.
 
-Na pasta do projeto, execute:
+Na pasta raiz do projeto, crie um ambiente virtual:
 
-    python -m pip install -r requirements.txt
+```powershell
+python -m venv .venv
+```
+
+Ative o ambiente virtual conforme seu sistema operacional.
+
+**Windows (PowerShell):**
+```powershell
+.\.venv\Scripts\Activate.ps1
+```
+
+**Windows (CMD):**
+```cmd
+.venv\Scripts\activate.bat
+```
+
+**Linux/macOS:**
+```bash
+source .venv/bin/activate
+```
+
+Com o ambiente virtual ativado, instale as dependências:
+
+```powershell
+python -m pip install -r requirements.txt
+```
+
+Após a instalação, siga para a configuração das variáveis de ambiente.
 
 ### 2. Configurar as variáveis de ambiente
 

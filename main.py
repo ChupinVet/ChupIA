@@ -1,6 +1,7 @@
 from services.gemini_service import SessaoChupIA
 
-sessao = SessaoChupIA(id_pet=1)
+id_pet = int(input("Digite o ID do pet que deseja consultar: "))
+sessao = SessaoChupIA(id_pet=id_pet)
 
 print("=== ChupIA - Assistente Inteligente do ChupinVet ===")
 print("Digite 'sair' para encerrar.\n")

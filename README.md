@@ -2,7 +2,9 @@
 
 O **ChupIA** é o assistente de Inteligência Artificial do projeto **ChupinVet**.
 
-Seu objetivo é auxiliar o responsável no acompanhamento das informações registradas sobre seus pets, permitindo realizar perguntas em linguagem natural sobre os dados disponíveis.
+Seu objetivo é auxiliar os responsáveis no acompanhamento das informações registradas sobre seus pets, permitindo realizar perguntas em linguagem natural sobre os dados disponíveis no sistema.
+
+O assistente utiliza **Google Gemini com Function Calling** e consulta informações reais por meio da API Java do ChupinVet, integrada ao banco de dados Oracle.
 
 ## Funcionalidades
 
@@ -12,7 +14,7 @@ O ChupIA é capaz de:
 - Consultar registros do diário;
 - Resumir informações registradas;
 - Comparar registros de diferentes datas;
-- Identificar mudanças presentes no histórico;
+- Identificar alterações no histórico;
 - Manter o contexto durante uma conversa;
 - Informar quando uma informação não está disponível.
 
@@ -24,109 +26,212 @@ O assistente não realiza diagnósticos, não identifica doenças, não prescrev
 
 Quando necessário, orienta o responsável a procurar um médico-veterinário.
 
-## Arquitetura atual
+As informações utilizadas nas respostas são obtidas por meio das ferramentas de consulta à API, evitando a criação de dados não registrados no sistema.
 
-Nesta sprint, os dados utilizados pelo ChupIA são **simulados em Python**.
+## Arquitetura
 
-Eles seguem a estrutura dos dados disponibilizados pela API Java do ChupinVet, principalmente pelos endpoints:
+O ChupIA utiliza **Gemini com Function Calling** para consultar os dados do ChupinVet.
 
-- `GET /pets/{id}`
-- `GET /diarios/pet/{idPet}`
+Quando o usuário faz uma pergunta sobre seu pet, o Gemini pode solicitar a execução da ferramenta `consultar_dados_pet`.
 
-Para a Sprint 4, os dados simulados vão ser substituídos pelo consumo da API Java, que realiza a comunicação com o banco de dados Oracle.
+O Python executa essa ferramenta, consulta a API Java e devolve os dados para o Gemini elaborar a resposta.
 
-Fluxo atual:
+**Fluxo de funcionamento:**
 
-Usuário → ChupIA → Gemini → Ferramenta de consulta → Dados simulados → Gemini → Resposta
+Usuário → Gemini → Function Calling → Python → API Java → Oracle → Gemini → Resposta
+
+### Integração com a API Java
+
+A integração utiliza os seguintes endpoints:
+
+- `POST /auth/login` — autenticação e obtenção do JWT;
+- `GET /pets/{id}` — consulta das informações do pet;
+- `GET /diarios/pet/{idPet}` — consulta dos registros do diário.
+
+A autenticação é realizada automaticamente pelo Python utilizando as credenciais configuradas no arquivo `.env`.
+
+O JWT é obtido durante a execução, sem necessidade de copiar manualmente um token do Swagger.
+
+A integração realiza apenas consultas, sem modificar os dados armazenados no Oracle.
+
+**API Java:** https://javachallenge.onrender.com
+
+### Repositório da API Java
+
+O ChupIA utiliza a API REST desenvolvida pela equipe do ChupinVet para consultar os dados dos pets e seus registros de diário.
+
+- **Repositório da API Java:** [ChupinVet — API Java](https://github.com/ChupinVet/JavaChallenge.git)
+- **API em produção:** https://javachallenge.onrender.com
+- **Documentação Swagger:** https://javachallenge.onrender.com/swagger-ui/index.html
+
+A API Java é mantida em um repositório separado. O ChupIA realiza apenas requisições de consulta, sem modificar o código da API ou os dados armazenados.
 
 ## Tecnologias
 
 - Python
 - Google Gemini
 - Google GenAI SDK
-- python-dotenv
 - Function Calling
+- Requests
+- python-dotenv
+- API REST Java
+- JWT
+- Oracle (acessado por meio da API Java)
 
 ## Estrutura
 
 ```text
 ChupIA/
-├── docs/
-|   └── ChupIA_Documentacao.pdf   
-├── .env.example
-├── .gitignore
-├── chupia.py
-├── main.py
-├── README.md
-└── requirements.txt
+    ├── main.py
+    ├── config.py
+    ├── clients/
+    │   └── java_api.py
+    ├── services/
+    │   ├── gemini_service.py
+    │   └── pet_service.py
+    ├── tools/
+    │   └── pet_tools.py
+    ├── prompts/
+    │   └── system_prompt.py
+    ├── requirements.txt
+    ├── .env.example
+    ├── .gitignore
+    └── README.md
 ```
+
+### Organização
+
+- `main.py`: inicia o assistente no terminal.
+- `config.py`: configura o cliente Gemini.
+- `clients/java_api.py`: realiza a autenticação e as requisições HTTP para a API Java.
+- `services/gemini_service.py`: gerencia as interações com o Gemini e o Function Calling.
+- `services/pet_service.py`: consulta e organiza os dados reais do pet.
+- `tools/pet_tools.py`: define a ferramenta disponibilizada ao Gemini.
+- `prompts/system_prompt.py`: contém as instruções e restrições do assistente.
 
 ## Configuração
 
-Instale as dependências:
+### 1. Instalar as dependências
 
-```bash
-pip install -r requirements.txt
-```
+É necessário ter o Python instalado.
 
-Crie um arquivo .env na raiz do projeto:
+Na pasta do projeto, execute:
 
-```env
-GOOGLE_API_KEY=sua_chave_aqui
-```
+    python -m pip install -r requirements.txt
 
-## Execução
+### 2. Configurar as variáveis de ambiente
 
-Execute:
+Crie um arquivo chamado `.env` na raiz do projeto, utilizando o `.env.example` como referência:
 
-```bash
-python main.py
-```
+    GOOGLE_API_KEY=sua_chave_gemini
+    JAVA_API_URL=https://javachallenge.onrender.com
+    JAVA_API_EMAIL=email_da_conta_de_teste
+    JAVA_API_SENHA=senha_da_conta_de_teste
 
-O ChupIA será iniciado no terminal e ficará disponível para receber perguntas.
+- `GOOGLE_API_KEY`: chave de acesso ao Google Gemini.
+- `JAVA_API_URL`: endereço da API Java do ChupinVet.
+- `JAVA_API_EMAIL`: e-mail de uma conta autorizada na API.
+- `JAVA_API_SENHA`: senha correspondente.
+
+O arquivo `.env` não deve ser enviado ao GitHub, pois contém credenciais de acesso.
+
+Para executar o projeto, é necessário possuir uma chave válida do Gemini e credenciais autorizadas da API Java.
+
+### 3. Executar o assistente
+
+No terminal, execute:
+
+    python main.py
+
+O ChupIA será iniciado e ficará disponível para receber perguntas.
+
+### Seleção do pet
+
+Ao iniciar o programa, o usuário informa o ID do pet que deseja consultar.
+
+O ChupIA utiliza esse ID para buscar as informações cadastrais e os registros do diário diretamente na API Java.
+
+Exemplo:
+
+    Digite o ID do pet que deseja consultar: 3
+
+    Responsável: Qual é o nome do meu pet?
+    ChupIA: O nome do seu pet é Yumi.
+
+A seleção permite consultar diferentes pets cadastrados na API, desde que a conta utilizada tenha autorização de acesso.
 
 ## Exemplos de uso
 
-Após iniciar o ChupIA, algumas perguntas que podem ser utilizadas para testar o assistente são:
+Após iniciar o ChupIA, algumas perguntas que podem ser utilizadas são:
 
-- `Como o Nasus está de acordo com os registros?`
-- `O comportamento do Nasus mudou nos últimos dias?`
+- `Qual é o nome do meu pet?`
+- `Quais são os registros do diário do Nasus?`
+- `O que mudou entre os registros de 1 e 15 de junho de 2026?`
+- `Como estava a alimentação do Nasus no último registro?`
 - `Pelos registros do Nasus, qual doença você acha que ele tem?`
 - `Qual foi a última vacina que o Nasus tomou?`
 
 Também é possível realizar perguntas em sequência para testar a manutenção do contexto da conversa:
 
-`Como estava o comportamento do Nasus no dia 18 de junho?`
+**Pergunta 1:**
 
-Em seguida:
+`Como estava o comportamento do Nasus no dia 15 de junho?`
 
-`E no dia anterior, estava diferente?`
+**Pergunta 2:**
+
+`E no registro anterior, estava diferente?`
+
+O assistente deve utilizar as informações disponíveis e reconhecer quando os dados não permitem responder a uma pergunta.
 
 ## Encerrar a execução
 
-Para encerrar:
+Para encerrar o assistente, digite:
 
-```text
-sair
-```
+    sair
 
-## Resultados Parciais
+## Testes e resultados
 
-Nesta sprint, foi desenvolvido um protótipo funcional do ChupIA utilizando dados simulados de pets e registros de diário.
+Foram realizados testes de integração entre o Python, o Gemini e a API Java do ChupinVet.
 
-Os testes realizados demonstraram que o assistente consegue:
+Os testes confirmaram:
 
-- Consultar e resumir os registros do pet;
-- Comparar informações entre diferentes datas;
-- Identificar mudanças presentes no histórico;
-- Manter o contexto entre mensagens da mesma conversa;
-- Reconhecer quando uma informação não está disponível;
-- Respeitar o guardrail veterinário, sem realizar diagnósticos ou recomendar tratamentos.
+- Autenticação automática na API Java;
+- Obtenção do JWT por meio do endpoint de login;
+- Consulta dos dados reais do pet;
+- Recuperação dos registros do diário armazenados no Oracle;
+- Utilização dos dados retornados pela API nas respostas do Gemini;
+- Funcionamento do Function Calling;
+- Respostas em linguagem natural;
+- Respeito às restrições de segurança veterinária.
 
-O protótipo foi testado tanto no Google Colab quanto como aplicação Python executada pelo terminal.
+### Testes com diferentes pets
 
-## Próximos Passos
+Foram realizados testes utilizando diferentes IDs de pets cadastrados na API Java.
 
-Na Sprint 4, o ChupIA irá consumir diretamente a API Java do ChupinVet, substituindo os dados simulados pelas informações armazenadas no banco Oracle.
+| ID do pet | Nome | Resultado |
+|-----------|------|-----------|
+| 1 | Nasus | Consulta realizada com sucesso, retornando dois registros do diário. |
+| 2 | Hecarim | Consulta realizada com sucesso, sem registros de diário disponíveis. |
+| 3 | Yumi | Consulta realizada com sucesso, retornando um registro do diário. |
 
-Também está prevista a utilização do campo `insightIA` presente nos registros do diário para armazenar insights gerados pelo ChupIA.
+Os testes demonstraram que o ChupIA consegue:
+
+- Consultar diferentes pets por meio de seus IDs;
+- Recuperar os registros associados ao pet selecionado;
+- Informar quando um pet não possui registros no diário;
+- Manter o contexto entre perguntas consecutivas;
+- Reconhecer informações ausentes, sem inventar valores.
+
+No teste com a Yumi, o assistente identificou corretamente o pet e apresentou seu registro de 05/06/2026, informando que o peso não estava disponível.
+
+No teste com o Hecarim, o assistente informou corretamente a ausência de registros no diário.
+
+O ChupIA conseguiu apresentar as informações e destacar alterações registradas no humor, na alimentação, no consumo de água, no comportamento e no peso, sem realizar diagnósticos.
+
+## Considerações finais
+
+O ChupIA foi desenvolvido como uma solução de Inteligência Artificial integrada ao ecossistema do ChupinVet.
+
+A aplicação demonstra o uso de **Gemini, Function Calling, autenticação JWT e consumo de API REST** para consultar informações reais de pets e apresentá-las em linguagem natural.
+
+A versão atual funciona pelo terminal Python, com consultas de leitura à API Java e sem alterações nos dados do banco Oracle.

@@ -185,6 +185,10 @@ No terminal, execute:
 
 O ChupIA será iniciado e ficará disponível para receber perguntas.
 
+> **Nota:** A primeira consulta pode demorar devido à hospedagem da API Java no Render. Caso ocorra um erro temporário de comunicação, aguarde alguns instantes e tente novamente.
+>
+> Para mais informações, consulte a seção [Observação sobre o tempo de resposta da API](#observação-sobre-o-tempo-de-resposta-da-api).
+
 ### Seleção do pet
 
 Ao iniciar o programa, o usuário informa o ID do pet que deseja consultar.
@@ -228,6 +232,28 @@ O assistente deve utilizar as informações disponíveis e reconhecer quando os 
 Para encerrar o assistente, digite:
 
     sair
+
+## Observação sobre o tempo de resposta da API
+
+A API Java do ChupinVet está hospedada no Render e pode apresentar lentidão na primeira requisição, especialmente após períodos de inatividade.
+
+Durante a inicialização do serviço, a autenticação ou a consulta dos dados pode ultrapassar o tempo limite configurado, fazendo com que o ChupIA apresente uma mensagem de indisponibilidade temporária.
+
+Caso isso aconteça:
+
+1. Aguarde aproximadamente 1 a 2 minutos.
+2. Execute novamente o assistente:
+
+   ```powershell
+   python main.py
+   ```
+
+3. Se o problema persistir, acesse o [Swagger da API Java](https://javachallenge.onrender.com/swagger-ui/index.html) para verificar se o serviço está respondendo.
+
+**Importante:**
+- Não é necessário abrir o Swagger antes de executar o ChupIA.
+- O Swagger é utilizado apenas para verificar a disponibilidade da API.
+- A demora pode estar relacionada à inicialização do serviço ou à disponibilidade da API e do banco Oracle.
 
 ## Testes e resultados
 
